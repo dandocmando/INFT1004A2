@@ -4,7 +4,7 @@ Author: Daniel Ferguson
 Auth ID: 3374690
 Date: Start -> 10/04/22 Completion -> 12/04/22
 Task: INFT1004 Assignment 2: Spending Spree
-I have ported large parts of this program from assessment 1
+I have ported large parts of this program from assessment 1 :)
 I have integrated Pandas Dataframes into them for csv manipulation
 You DO NOT need to write defs into the console, just run the entire program.
 """
@@ -35,7 +35,8 @@ class MainMenu:
             print("Hello " + str(getuser()) + "!\n")  # :)
             self.username = str(getuser())
             self.name_assigned = True
-        t.sleep(1)
+            t.sleep(1)
+
         print("Welcome to the Spending Spree Menu!\n")
         t.sleep(self.dt)
 
@@ -100,7 +101,7 @@ class MainMenu:
         while gc_max_items < 1 or gc_max_items > 5:
             gc_max_items = int(input("Please enter a value in a range of 1-5: "))
 
-        print("\n")
+        print('')
 
         # prints out the previously input details
         t.sleep(self.dt)
@@ -111,13 +112,9 @@ class MainMenu:
         print("Gift card maximum number of items allowed to purchase: " + str(gc_max_items) + "\n")
 
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
-        print(df)  # remove before handin
-        print("\n")
         df.loc[len(df)] = [gc_name, gc_max_spend, gc_max_items]  # creates a new row and adds the gc details into it
-        print(df)
         df.to_csv('giftCards.csv', index=None)  # writes the Dataframe to the csv file.
 
-        print('')
         re_to_menu = input("Would you like to return to the menu (Y or N): ")
         if re_to_menu.upper() == "Y":
             self.menu()  # returns to menu
@@ -125,11 +122,8 @@ class MainMenu:
             sys.exit()
 
     def spending_spree(self):
-
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
 
-        # print(df)
-        # print(df.loc[0, 'Name'])
         print("\nPlease choose a gift card from this list: \n")
         for col in range(len(df)):
             t.sleep(self.dt)
@@ -200,7 +194,7 @@ class MainMenu:
         combined_df = pd.concat([pd.read_csv('spendingHistory.csv'), export_df])
         pd.DataFrame(combined_df).to_csv('spendingHistory.csv', index=False)
 
-        print("Gift card expended, your purchases are listed below, they are ordered from most to least expensive.\n")
+        print("Gift card expended, purchases are listed below, they are ordered from most to least expensive.\n")
         for x in range(loop_count):  # prints the list of transactions ordered highest cost to lowest :)
             print("Cost: $" + str(gc_list_sorted[x][0]) + ", item description: " + str(gc_list_sorted[x][1]))
             t.sleep(self.dt)  # exceeds requirement to print most expensive item.
@@ -238,20 +232,22 @@ class MainMenu:
         temp_choice = int(input("\nPlease enter the number of the gift card you would like to view: "))
         # takes user input as 1,2,3 etc
         print("")
-        gc_indiv_ch = gc_names.loc[(temp_choice - 1), 'GiftCardName']
-        # converts 1,2,3 into the actual GiftCardName required for steps below
+        gc_indiv_ch = gc_names.loc[(temp_choice - 1), 'GiftCardName']  # gift card individual choice
+        # converts 1,2,3 etc into the actual GiftCardName required for steps below
 
         init.set_index('GiftCardName', inplace=True)  # makes column 'GiftCardName' the index
         gc_indiv_purchases = init.loc[gc_indiv_ch, :]  # passes rows based on index name, selected by gc_indiv_ch
-        gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName index, replaces with 0,1,2 etc
+        gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName as the index
 
         t.sleep(self.dt)
         print("Purchase History of " + gc_indiv_ch + ": ")
-        for col in range(len(gc_indiv_purchases)):
+        for col in range(len(gc_indiv_purchases)):  # loops for the number of items purchases by selected gift card
             t.sleep(self.dt)
             print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " +
                   str(gc_indiv_purchases.loc[col, 'ItemDescription']))
+            # prints out gift card purchase price and description
 
+        print('')
         re_to_menu = input("Would you like to return to the menu (Y or N): ")
         if re_to_menu.upper() == "Y":
             self.menu()  # returns to menu
@@ -260,7 +256,7 @@ class MainMenu:
             sys.exit()
 
     def gc_names(self):
-        print("List of gift cards: ")
+        print("\nList of gift cards: ")
         init = pd.read_csv('giftCards.csv')
 
         gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
@@ -271,6 +267,7 @@ class MainMenu:
         for i in range(len(gc_names.index)):  # loops for the number of gift card names in the dataframe
             print(str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
 
+        print('')
         re_to_menu = input("Would you like to return to the menu (Y or N): ")
         if re_to_menu.upper() == "Y":
             self.menu()  # returns to menu
@@ -294,9 +291,9 @@ class MainMenu:
         pd.DataFrame(spending_history).to_csv('spendingHistory.csv', index=False)
         print("Initialisation complete: csv files created and setup.")
 
-        with open("pr_lch.bak", 'w') as file_edit:  # creates a file that tells the program if it has been run before
-            file_edit.write("1")
-            os.system("attrib +h pr_lch.bak")
+        with open("pr_lch.bak", 'w') as file_edit:  # creates file that tells the program if it has been run before
+            file_edit.write("1")  # writes a '1' into the file
+            os.system("attrib +h pr_lch.bak")  # hides file
 
         self.menu()
 
