@@ -1,0 +1,5 @@
+# df.style.format("{:,}")
+# new_df = pd.DataFrame(df.Name.str.split(',').tolist(), index=df.Name).stack()
+# index = df.SpendingLimit.stack
+# new_df = new_df.reset_index([0, 'SpendingLimit'])
+# new_df.columns = ['SpendingLimit', 'MaxItems']
