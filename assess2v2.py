@@ -8,11 +8,13 @@ I have ported large parts of this program from assessment 1
 I have Integrated Pandas Dataframes into them for csv manipulation
 You DO NOT need to write defs into the console, just run the entire program.
 """
+import os
 import sys
 import time as t
 import numpy as np
 import pandas as pd
 import io
+from getpass import getuser
 
 
 class MainMenu:
@@ -32,8 +34,10 @@ class MainMenu:
     def menu(self):
         print("Welcome to the Spending Spree Menu!\n")
         t.sleep(self.dt)
+
         if not self.name_assigned:  # if not implemented so user only enters name once
-            self.username = input("Please enter your name: ")
+            print("Hello " + str(getuser()) + "!")  # :)
+            self.username = str(getuser())
             self.name_assigned = True
 
         print('')
@@ -82,12 +86,11 @@ class MainMenu:
     def gift_card(self):
         print("Hello, I am Delilah, your personal gift card management system.")
         t.sleep(self.dt)  # stops the sequence for .3, adds readability
-        self.username = input("What is your name?\n")  # asks for users name for later use.
-        print("Please enter the specifications of your gift card:\n")
+        print("Please enter the specifications of your gift card.\n")
 
         # all inputs are for the gift card specifications.
         gc_name = input("Gift card name:")
-        gc_name = self.input_checker(gc_name, 'giftCards.csv', 'Name')  # runs input_checker method
+        gc_name = self.input_checker(gc_name, 'giftCards.csv', 'GiftCardName')  # runs input_checker method
         # input_checker is used to determine if gift card name has been used, gc_name will be reassigned if it has
 
         gc_max_spend = float(input("Gift card maximum spending ($100-$500): "))
@@ -108,17 +111,19 @@ class MainMenu:
         t.sleep(self.dt)
         print("Gift card maximum number of items allowed to purchase: " + str(gc_max_items) + "\n")
 
-        df = pd.read_csv('test.csv')  # reads giftCards.csv into Dataframe df
+        df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
         print(df)  # remove before handin
         print("\n")
         df.loc[len(df)] = [gc_name, gc_max_spend, gc_max_items]  # creates a new row and adds the gc details into it
         print(df)
-        df.to_csv('test.csv', index=None)  # writes the Dataframe to the csv file.
+        df.to_csv('giftCards.csv', index=None)  # writes the Dataframe to the csv file.
 
         print('')
         re_to_menu = input("Would you like to return to the menu (Y or N): ")
         if re_to_menu.upper() == "Y":
             self.menu()  # returns to menu
+        else:
+            sys.exit()
 
     def spending_spree(self):
 
@@ -184,7 +189,7 @@ class MainMenu:
         # ported def loop from assess 1.
         # nests Cost and Items into sublists so that Cost var can be manipulated using sorted function
         # use prints on the below lists after manipulation to gain greater understanding of what is happening :)
-        gc_list_nested = [list(t) for t in zip(gc_cost_lst, gc_items_lst)]
+        gc_list_nested = [list(x) for x in zip(gc_cost_lst, gc_items_lst)]
         # uses nested list to sort nested items based on cost, because desc is nested it follows cost movement
         gc_list_sorted = sorted(gc_list_nested, key=lambda l: l[0], reverse=True)
 
@@ -192,12 +197,9 @@ class MainMenu:
         export_df = pd.DataFrame(gc_list_sorted, columns=['ItemPrice', 'ItemDescription'])
         export_df['GiftCardName'] = gc_card_name  # creates a new column with the name of the gift card used
         export_df = export_df.loc[:, ['GiftCardName', 'ItemDescription', 'ItemPrice']]  # rearranges the columns
-        check_if_empty = pd.read_csv('test.csv')
-        check_if_empty = pd.DataFrame()
-        print(check_if_empty.empty)
 
-        combined_df = pd.concat([pd.read_csv('test.csv'), export_df])
-        pd.DataFrame(combined_df).to_csv('export_test.csv', index=False)
+        combined_df = pd.concat([pd.read_csv('spendingHistory.csv'), export_df])
+        pd.DataFrame(combined_df).to_csv('spendingHistory.csv', index=False)
 
         print("Gift card expended, your purchases are listed below, they are ordered from most to least expensive.\n")
         for x in range(loop_count):  # prints the list of transactions ordered highest cost to lowest :)
@@ -214,24 +216,53 @@ class MainMenu:
         t.sleep(self.dt)
         print("The average cost was: $" + str(round(gc_average_cost, 2)) + "\n")  # rounds avg cost -> 2 dec places
         t.sleep(self.dt)
-        print(self.username + ", would you like to try another card or exit the program?")
-        t.sleep(self.dt)
-        retry = input("To return to the main menu enter 1, enter E to exit the program: ")
 
-        if retry == "1":
-            self.menu()
-
-        elif retry == "E":
-            print("Have a nice day!")
-            sys.exit()  # ends the .py
+        re_to_menu = input("Would you like to return to the menu (Y or N): ")
+        if re_to_menu.upper() == "Y":
+            self.menu()  # returns to menu
 
         else:
-            print("You failed to correctly enter a choice so I decided to exit the program for you :)")
             sys.exit()
 
     def gc_history(self):
         print("List of gift cards: ")
-        init = pd.read_csv('someNumbers.csv')
+        init = pd.read_csv('spendingHistory.csv')
+
+        gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
+        gc_names = gc_names.drop_duplicates()  # removes duplicate names from the series
+        gc_names = gc_names.to_frame()  # turns the series into a dataframe
+        gc_names.reset_index(inplace=True, drop=True)  # fixes the index, when duplicates are removed index breaks
+
+        for i in range(len(gc_names.index)):  # loops for the number of gift card names in the dataframe
+            print(str(i+1)+". "+str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
+
+        temp_choice = int(input("\nPlease enter the number of the gift card you would like to view: "))
+        # takes user input as 1,2,3 etc
+        print("")
+        gc_indiv_ch = gc_names.loc[(temp_choice-1), 'GiftCardName']
+        # converts 1,2,3 into the actual GiftCardName required for steps below
+
+        init.set_index('GiftCardName', inplace=True)  # makes column 'GiftCardName' the index
+        gc_indiv_purchases = init.loc[gc_indiv_ch, :]  # passes rows based on index name, selected by gc_indiv_ch
+        gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName index, replaces with 0,1,2 etc
+
+        t.sleep(self.dt)
+        print("Purchase History of "+gc_indiv_ch+": ")
+        for col in range(len(gc_indiv_purchases)):
+            t.sleep(self.dt)
+            print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " +
+                  str(gc_indiv_purchases.loc[col, 'ItemDescription']))
+
+        re_to_menu = input("Would you like to return to the menu (Y or N): ")
+        if re_to_menu.upper() == "Y":
+            self.menu()  # returns to menu
+
+        else:
+            sys.exit()
+
+    def gc_names(self):
+        print("List of gift cards: ")
+        init = pd.read_csv('giftCards.csv')
 
         gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
         gc_names = gc_names.drop_duplicates()  # removes duplicate names from the series
@@ -241,23 +272,47 @@ class MainMenu:
         for i in range(len(gc_names.index)):  # loops for the number of gift card names in the dataframe
             print(str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
 
-        view_choice = input("\nPlease enter the exact name of the gift card you would like to view: ")
-        print("")
+        re_to_menu = input("Would you like to return to the menu (Y or N): ")
+        if re_to_menu.upper() == "Y":
+            self.menu()  # returns to menu
+        else:
+            sys.exit()
 
-        init.set_index('GiftCardName', inplace=True)  # makes column 'GiftCardName' the index
-        gc_indiv_purchases = init.loc[view_choice, :]  # passes rows based on index name, selected by view_choice
-        gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName index, replaces with 0,1,2 etc
+    def create_initial_csv(self):
+        # this def will be launched on the first run of this program on a new computer.
+        # it creates the two csv files needed and fills them with the data required by the program
+        # creates giftCards.csv
+        gift_cards = pd.DataFrame(columns=['GiftCardName', 'SpendingLimit', 'MaxItems'])
+        # creates dataframe and adds specified columns
+        gift_cards.loc[0, 'GiftCardName'] = 'Victory-day gift card'  # adds specified data into dataframe
+        gift_cards.loc[0, 'SpendingLimit'] = 200
+        gift_cards.loc[0, 'MaxItems'] = 4
 
-        t.sleep(self.dt)
-        print("Purchase History:")
-        for col in range(len(gc_indiv_purchases)):
-            t.sleep(self.dt)
-            print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " +
-                  str(gc_indiv_purchases.loc[col, 'ItemDescription']))
+        pd.DataFrame(gift_cards).to_csv('giftCards.csv', index=False)  # exports dataframe to csv
 
-    def gc_names(self):
-        print("penis")
+        # creates spendingHistory.csv
+        spending_history = pd.DataFrame(columns=['GiftCardName', 'ItemDescription', 'ItemPrice'])
+        pd.DataFrame(spending_history).to_csv('spendingHistory.csv', index=False)
+        print("Initialisation complete: csv files created and setup.")
+
+        with open("pr_lch.bak", 'w') as file_edit:  # creates a file that tells the program if it has been run before
+            file_edit.write("1")
+            os.system("attrib +h pr_lch.bak")
+
+        self.menu()
+
+    def on_launch(self):
+        if os.path.exists("pr_lch.bak"):  # checks if file exists
+            os.system("attrib -h pr_lch.bak")  # unhides file
+            with open("pr_lch.bak", 'r') as launched_before:
+                if launched_before.readline() == '1':  # checks if it has a '1' in it
+                    os.system("attrib +h pr_lch.bak")  # rehides file (stops tampering)
+                    self.menu()  # starts menu
+                else:
+                    self.create_initial_csv()  # runs initial startup
+        else:
+            self.create_initial_csv()
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
-MainMenu_ob.menu()  # launches def menu
+MainMenu_ob.on_launch()
