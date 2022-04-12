@@ -56,33 +56,6 @@ class MainMenu:
         if choice.lower() == 'q':
             print("Goodbye! ")
 
-    def input_checker(self, input_to_be_checked, csv, column_name):
-        # This method is used to determine if the argument 'input_to_be_checked' is already a 'col_name' (column)
-        # in the 'csv' file. If it is, then the user will be asked to replace the name with one not in
-        # the 'csv' file.
-
-        df = pd.read_csv(csv)  # reads the csv file from the argument csv
-
-        in_chk = input_to_be_checked  # reduce local var names for ease of use
-        col_name = column_name
-
-        name_allowed = False
-        while not name_allowed:  # will loop until name_allowed = True
-
-            name_found = False  # assigns found to false each loop to reset it
-            #  this is done incase user enters another in_chk that is also used
-            for col in range(len(df)):  # loops through columns of df for the number of columns in df
-                if df.loc[col, col_name] == in_chk:  # if in_chk var equals the value inside the column passed in
-                    # 'col_name'
-                    name_found = True  # if in_chk is found, set to name_found to True for the next if statement
-
-            if name_found:  # gets user to type a new in_chk
-                in_chk = input("Please enter a different gift card name: ")
-            else:  # if in_chk isn't found in df column 'Name' then user is allowed to name gift card in_chk val
-                name_allowed = True  # this will end while loop
-
-        return in_chk
-
     def gift_card(self):  # 1
         print("Hello, I am Delilah, your personal gift card management system.")
         t.sleep(self.dt)  # stops the sequence for .3, adds readability
@@ -90,7 +63,7 @@ class MainMenu:
 
         # all inputs are for the gift card specifications.
         gc_name = input("Gift card name:")
-        gc_name = self.input_checker(gc_name, 'giftCards.csv', 'GiftCardName')  # runs input_checker method
+        gc_name = input_checker(gc_name, 'giftCards.csv', 'GiftCardName')  # runs input_checker method
         # input_checker is used to determine if gift card name has been used, gc_name will be reassigned if it has
 
         gc_max_spend = float(input("Gift card maximum spending ($100-$500): "))
@@ -316,6 +289,34 @@ class MainMenu:
                     self.create_initial_csv()  # runs initial startup
         else:
             self.create_initial_csv()
+
+
+def input_checker(input_to_be_checked, csv, column_name):
+    # This method is used to determine if the argument 'input_to_be_checked' is already a 'col_name' (column)
+    # in the 'csv' file. If it is, then the user will be asked to replace the name with one not in
+    # the 'csv' file.
+
+    df = pd.read_csv(csv)  # reads the csv file from the argument csv
+
+    in_chk = input_to_be_checked  # reduce local var names for ease of use
+    col_name = column_name
+
+    name_allowed = False
+    while not name_allowed:  # will loop until name_allowed = True
+
+        name_found = False  # assigns found to false each loop to reset it
+        #  this is done incase user enters another in_chk that is also used
+        for col in range(len(df)):  # loops through columns of df for the number of columns in df
+            if df.loc[col, col_name] == in_chk:  # if in_chk var equals the value inside the column passed in
+                # 'col_name'
+                name_found = True  # if in_chk is found, set to name_found to True for the next if statement
+
+        if name_found:  # gets user to type a new in_chk
+            in_chk = input("Please enter a different gift card name: ")
+        else:  # if in_chk isn't found in df column 'Name' then user is allowed to name gift card in_chk val
+            name_allowed = True  # this will end while loop
+
+    return in_chk
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
