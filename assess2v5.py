@@ -66,13 +66,14 @@ class MainMenu:
         gc_name = input_checker(gc_name, 'giftCards.csv', 'GiftCardName')  # runs input_checker method
         # input_checker is used to determine if gift card name has been used, gc_name will be reassigned if it has
 
-        gc_max_spend = float(input("Gift card maximum spending ($100-$500): "))
+        # check_input_type is used to make sure the input given is the type wanted, will be reassigned if it isn't
+        gc_max_spend = check_input_type(input("Gift card maximum spending ($100-$500): "), float)
         while gc_max_spend > 500 or gc_max_spend < 100:  # checks if input fits requirements, loops until it does
-            gc_max_spend = float(input("Please enter a value in a range of $100-$500: "))
+            gc_max_spend = check_input_type(input("Please enter a value in a range of $100-$500: "), float)
 
-        gc_max_items = int(input("Maximum number of items allowed to purchase (1-5): "))
+        gc_max_items = check_input_type(input("Maximum number of items allowed to purchase (1-5): "), int)
         while gc_max_items < 1 or gc_max_items > 5:
-            gc_max_items = int(input("Please enter a value in a range of 1-5: "))
+            gc_max_items = check_input_type(input("Please enter a value in a range of 1-5: "), int)
 
         print('')
 
@@ -88,11 +89,11 @@ class MainMenu:
         df.loc[len(df)] = [gc_name, gc_max_spend, gc_max_items]  # creates a new row and adds the gc details into it
         df.to_csv('giftCards.csv', index=None)  # writes the Dataframe to the csv file.
 
-        re_to_menu = input("Would you like to return to the menu (Y or N): ")
-        if re_to_menu.upper() == "Y":
+        re_to_menu = input("Would you like to return to the menu (Yes or No): ")
+        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
             self.menu()  # returns to menu
         else:
-            sys.exit()
+            sys.exit()  # ends program
 
     def spending_spree(self):  # 2
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
@@ -105,7 +106,15 @@ class MainMenu:
             else:
                 print(str(col + 1) + ". " + str(df.loc[col, 'GiftCardName']))
 
-        col_ch = int(input("Please enter which card you would like to use (1, 2, 3 etc): ")) - 1
+        col_ch = check_input_type(input("Please enter which card you would like to use (1, 2, 3 etc): "), int) - 1
+        allowed_ans = False
+        # stops user being able to choose an option that will error out the rest of the program.
+        while not allowed_ans:
+            if col_ch < 0 or col_ch > (len(df) - 1):  # only allows user to choose a number inside
+                col_ch = check_input_type(input("Please enter a number listed above: "), int) - 1
+            else:
+                allowed_ans = True
+
         print('')
         # column choice (gc choice), used to assign vars below
 
@@ -130,7 +139,8 @@ class MainMenu:
         # no str into int input exception handling has been implemented, as isn't mentioned in marking guidelines.
         # loop will repeat until loop_count is greater than gc_max_items or temp_max is higher than gc_max_spend
         while loop_count < gc_max_items and temp_max < gc_max_spend:
-            cost = float(input("Purchase price: "))  # takes user input into cost variable
+            cost = check_input_type(input("Purchase price: "), float)  # takes user input into cost variable
+
             temp_max = temp_max + cost  # stores the temporary total cost
 
             if temp_max <= gc_max_spend:  # checks if temp max is lower or equal to max spend
@@ -182,12 +192,11 @@ class MainMenu:
         print("The average cost was: $" + str(round(gc_average_cost, 2)) + "\n")  # rounds avg cost -> 2 dec places
         t.sleep(self.dt)
 
-        re_to_menu = input("Would you like to return to the menu (Y or N): ")
-        if re_to_menu.upper() == "Y":
+        re_to_menu = input("Would you like to return to the menu (Yes or No): ")
+        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
             self.menu()  # returns to menu
-
         else:
-            sys.exit()
+            sys.exit()  # ends program
 
     def gc_names(self):  # 3
         print("\nList of existing gift cards: ")
@@ -202,11 +211,12 @@ class MainMenu:
             print(str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
 
         print('')
-        re_to_menu = input("Would you like to return to the menu (Y or N): ")
-        if re_to_menu.upper() == "Y":
+
+        re_to_menu = input("Would you like to return to the menu (Yes or No): ")
+        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
             self.menu()  # returns to menu
         else:
-            sys.exit()
+            sys.exit()  # ends program
 
     def gc_history(self):  # 4
         print("List of gift cards: ")
@@ -219,12 +229,12 @@ class MainMenu:
 
         if len(gc_names.index) == 0:  # checks index number, if 0 then nothing has been entered, no gc data exists
             print("You haven't gone on a spending spree yet, so no gift card history has been recorded.")
-            re_to_menu = input("Would you like to return to the menu (Y or N): ")
-            if re_to_menu.upper() == "Y":
-                self.menu()  # returns to menu
 
+            re_to_menu = input("Would you like to return to the menu (Yes or No): ")
+            if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
+                self.menu()  # returns to menu
             else:
-                sys.exit()
+                sys.exit()  # ends program
 
         for i in range(len(gc_names.index)):  # loops for the number of gift card names in the dataframe
             print(str(i + 1) + ". " + str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
@@ -236,24 +246,28 @@ class MainMenu:
         # converts 1,2,3 etc into the actual GiftCardName required for steps below
 
         init.set_index('GiftCardName', inplace=True)  # makes column 'GiftCardName' the index
-        gc_indiv_purchases = init.loc[gc_indiv_ch, :]  # passes rows based on index name, selected by gc_indiv_ch
+        gc_indiv_purchases = init.loc[[gc_indiv_ch], :]  # passes rows based on index name, selected by gc_indiv_ch
         gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName as the index
 
         t.sleep(self.dt)
         print("Purchase History of " + gc_indiv_ch + ": ")
         for col in range(len(gc_indiv_purchases)):  # loops for the number of items purchases by selected gift card
             t.sleep(self.dt)
-            print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " +
-                  str(gc_indiv_purchases.loc[col, 'ItemDescription']))
+            print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " + str(
+                gc_indiv_purchases.loc[col, 'ItemDescription']))
             # prints out gift card purchase price and description
 
-        print('')
-        re_to_menu = input("Would you like to return to the menu (Y or N): ")
-        if re_to_menu.upper() == "Y":
-            self.menu()  # returns to menu
 
+
+
+
+
+        print('')
+        re_to_menu = input("Would you like to return to the menu (Yes or No): ")
+        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
+            self.menu()  # returns to menu
         else:
-            sys.exit()
+            sys.exit()  # ends program
 
     def create_initial_csv(self):
         # this def will be launched on the first run of this program on a new computer.
@@ -322,64 +336,77 @@ def input_checker(input_to_be_checked, csv, column_name):
 def check_input_type(input_var, input_type):
     # This method is used to determine if the input_var is the same type as the input_type.
     # This is needed to make sure the user is entering the right var type so that the program doesn't create an error
-    print("gay")
+    in_var = input_var
 
     is_int = False  # loop will run until bool is True
 
     if input_type.__name__ == 'float':  # whole numbers can also be floats, so they won't need to be re-assigned
         try:
-            input_var = float(input_var)  # if this is possible then input is a float or whole number
+            in_var = float(in_var)  # if this is possible then input is a float or whole number
             # and doesn't need to be reassigned.
             # this is needed so that prices, which can be both, don't ask the user to enter a float when they input
             # a whole number
-        except ValueError:
             is_int = True  # stops while loop from running
+        except ValueError:
+            is_int = False
+
+    if input_type.__name__ == 'int':
+        # the input is always a string initially, this checks if it can be converted to an int without issue
+        # if it can, then input is an int. This stops the program asking twice for input if the input is int
+        try:
+            in_var = int(in_var)
+            is_int = True
+        except ValueError:
+            is_int = False
 
     while not is_int:
-        if not isinstance(input_var, input_type):  # checks if var isn't the var type wanted, runs if true
-            if input_type.__name__ == 'int':
-                correct_input = input("This input requires an integer, enter an int: ")
+        if not isinstance(in_var, input_type):  # checks if var isn't the var type wanted, runs if true
+
+            if input_type.__name__ == 'int':  # point of these is to prompt the user to enter the specific type wanted
+                in_var = input("This input requires an integer, enter an int: ")
             elif input_type.__name__ == 'str':
-                correct_input = input("This input requires a String, enter a str: ")
+                in_var = input("This input requires a String, enter a str: ")
             elif input_type.__name__ == 'float':
-                correct_input = input("This input requires a float, enter a float: ")
+                in_var = input("This input requires a float, enter a float: ")
 
             if input_type.__name__ == 'int':
-                print("cock")
                 try:  # tests if the input is an int
-                    correct_input = int(correct_input)  # attempts to convert the str input to an int
+                    in_var = int(in_var)  # attempts to convert the str input to an int
                 except ValueError:  # if input cannot be converted, below is printed and the while loops again
                     print("That wasn't an integer.")
-                if type(correct_input).__name__ == 'int':  # if correct_input is an int below will run
+                if type(in_var).__name__ == 'int':  # if in_var is an int below will run
                     is_int = True  # stops while loop
 
+            #  after creating the str checker I have realised it serves no purpose unless I want to make sure the
+            #  input cannot be an int or float either. The other two functions have purpose though.
             elif input_type.__name__ == 'str':
-                print("stupid nigga")
                 try:  # checks if input is an int
-                    correct_input = int(correct_input)
+                    in_var = int(in_var)
                     print("That wasn't a String.")
                 except ValueError:
                     try:  # checks if input is a float
-                        correct_input = float(correct_input)
+                        in_var = float(in_var)
                         print("That wasn't a String.")
                     except ValueError:  # if input isn't an int or float then below stops loop
-                        if type(correct_input).__name__ == 'str':
+                        if type(in_var).__name__ == 'str':
                             is_int = True
 
             elif input_type.__name__ == 'float':
                 try:
-                    correct_input = float(correct_input)
+                    in_var = float(in_var)
                 except ValueError:
                     print("That wasn't a float.")
-                if type(correct_input).__name__ == 'float':
+                if type(in_var).__name__ == 'float':
                     is_int = True
 
         else:
             is_int = True  # if isinstance is true then loop isn't needed
-            print("penis")
+
+    return in_var
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
-# MainMenu_ob.on_launch()
+MainMenu_ob.on_launch()
 # check_input_type(8.9, str)
-check_input_type(input("penis"), str)
+#drugs = check_input_type(45454545, str)
+#print(drugs)
