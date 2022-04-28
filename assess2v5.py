@@ -18,10 +18,13 @@ from getpass import getuser
 
 class MainMenu:
     def __init__(self):
+        # This method is a special python constructor which runs when the object class MainMenu is created.
+        # It initialises vars used from assessment 1, I removed some vars as they had been deprecated by
+        # my use of Dataframes in this assessment.
         self.dt = 0.3  # default time for t.sleep
 
         # vars ported from assess1, may cull over time
-        self.gc_items_lst = []  # init variables so that other defs can use them
+        self.gc_items_lst = []  # init variables so that other functions can use them
         self.gc_cost_lst = []
         self.loop_count = 0
         self.gc_name = ""
@@ -31,7 +34,8 @@ class MainMenu:
         self.name_assigned = False
 
     def menu(self):
-        if not self.name_assigned:  # if not implemented so user only enters name once
+        # spending spree menu, says hello to the user. Runs the menu 1,2,3,4 Q options.
+        if not self.name_assigned:  # implemented so user is only addressed once
             print("Hello " + str(getuser()) + "!\n")  # :)
             self.username = str(getuser())
             self.name_assigned = True
@@ -57,6 +61,8 @@ class MainMenu:
             print("Goodbye! ")
 
     def gift_card(self):  # 1
+        # This function allows the user to build extra gift cards.
+        # User will enter gift card specs, if all are accepted then gift card will be added to the csv.
         print("Hello, I am Delilah, your personal gift card management system.")
         t.sleep(self.dt)  # stops the sequence for .3, adds readability
         print("Please enter the specifications of your gift card.\n")
@@ -96,6 +102,9 @@ class MainMenu:
             sys.exit()  # ends program
 
     def spending_spree(self):  # 2
+        # This function allows the user to go on a spending spree.
+        # User will select a gift card to use, from 'giftCards.csv'.
+        # The gift card specs will be imported, user will spend until they exceed the specifications.
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
 
         print("\nPlease choose a gift card from this list: \n")
@@ -143,10 +152,12 @@ class MainMenu:
 
             not_zero = False
             while not not_zero:  # fixes entering 0 logic error from first assessment.
-                if cost > 0:
+                if cost > 0:  # checks if the cost var value is greater than 0
                     not_zero = True
                 else:
                     cost = check_input_type(input("Enter a number above 0: "), float)
+                    # check_input_type method is also used so that the user cannot enter a value below zero initially
+                    # and then enter a String here and cause an error.
 
             temp_max = temp_max + cost  # stores the temporary total cost
 
@@ -206,13 +217,15 @@ class MainMenu:
             sys.exit()  # ends program
 
     def gc_names(self):  # 3
+        # This function allows the user to print out the list of existing gift cards.
+        # Gift cards will be extracted from 'giftCards.csv' using Pandas functions
         print("\nList of existing gift cards: ")
-        init = pd.read_csv('giftCards.csv')
+        init = pd.read_csv('giftCards.csv')  # reads the csv into init
 
         gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
         gc_names = gc_names.drop_duplicates()  # removes duplicate names from the series
         gc_names = gc_names.to_frame()  # turns the series into a dataframe
-        gc_names.reset_index(inplace=True, drop=True)  # fixes the index, when duplicates are removed index breaks
+        gc_names.reset_index(inplace=True, drop=True)  # fixes the index, when duplicates are removed the index breaks
 
         for i in range(len(gc_names.index)):  # loops for the number of gift card names in the dataframe
             print(str(gc_names.loc[i, 'GiftCardName']))  # prints each name in the dataframe
@@ -226,8 +239,10 @@ class MainMenu:
             sys.exit()  # ends program
 
     def gc_history(self):  # 4
+        # This function prints out a gift card stored in 'spendingHistory.csv'.
+        # User will select a gift card to print and its purchase history, price and description will be printed.
         print("List of gift cards: ")
-        init = pd.read_csv('spendingHistory.csv')
+        init = pd.read_csv('spendingHistory.csv')  # reads the csv into init
 
         gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
         gc_names = gc_names.drop_duplicates()  # removes duplicate names from the series
@@ -295,12 +310,17 @@ class MainMenu:
         self.menu()  # starts menu
 
     def on_launch(self):
-        if os.path.exists("pr_lch.bak"):  # checks if file exists
+        # This function is the first function ran.
+        # It checks if the program has been opened before.
+        # If the program hasn't, it will launch the create_initial_csv function
+        # Else it will launch the menu function
+        if os.path.exists("pr_lch.bak"):  # checks if file exists, pr_lch is short for programRun_Launch.
             os.system("attrib -h pr_lch.bak")  # unhides file
-            with open("pr_lch.bak", 'r') as launched_before:
+            with open("pr_lch.bak", 'r') as launched_before:  # opens pr_lch file
                 if launched_before.readline() == '1':  # checks if it has a '1' in it
+                    # This is done to check if the file has been tampered with
                     os.system("attrib +h pr_lch.bak")  # rehides file (stops tampering)
-                    self.menu()
+                    self.menu()  # launches menu function
                 else:
                     self.create_initial_csv()  # runs initial startup
         else:
@@ -332,7 +352,7 @@ def input_checker(input_to_be_checked, csv, column_name):
         else:  # if in_chk isn't found in df column 'Name' then user is allowed to name gift card in_chk val
             name_allowed = True  # this will end while loop
 
-    return in_chk
+    return in_chk  # if the in_chk var passed is modified during this method then the modified value will be passed back
 
 
 def check_input_type(input_var, input_type):
@@ -342,26 +362,30 @@ def check_input_type(input_var, input_type):
 
     is_int = False  # loop will run until bool is True
 
+    # input_var is always a String initially, so the method would ask the user to enter an int or float
+    # even if their initial entry was an int or float, because it was a string when it was entered
+    # the two below if statements fix this issue.
     if input_type.__name__ == 'float':  # whole numbers can also be floats, so they won't need to be re-assigned
         try:
             in_var = float(in_var)  # if this is possible then input is a float or whole number
             # and doesn't need to be reassigned.
-            # this is needed so that prices, which can be both, don't ask the user to enter a float when they input
-            # a whole number
-            is_int = True  # stops while loop from running
-        except ValueError:
+            is_int = True  # This will run if the var has been converted without an error occurring
+            # stops while loop from running
+        except ValueError:  # if the (in_var = float(in_var)) line creates an error then this except will run
             is_int = False
 
     if input_type.__name__ == 'int':
         # the input is always a string initially, this checks if it can be converted to an int without issue
         # if it can, then input is an int. This stops the program asking twice for input if the input is int
         try:
-            in_var = int(in_var)
+            in_var = int(in_var)  # attempts to convert the in_var from a String to an int
             is_int = True
         except ValueError:
             is_int = False
 
-    while not is_int:
+    while not is_int:  # Will loop until is_int var is True
+        # Only one of the int, str, and float if statements will run each loop
+        # depending on the value of input_type.__name__
         if not isinstance(in_var, input_type):  # checks if var isn't the var type wanted, runs if true
 
             if input_type.__name__ == 'int':  # point of these is to prompt the user to enter the specific type wanted
@@ -371,7 +395,9 @@ def check_input_type(input_var, input_type):
             elif input_type.__name__ == 'float':
                 in_var = input("This input requires a float, enter a float: ")
 
-            if input_type.__name__ == 'int':
+            # checks if input_var type is an int
+            # all the inline comments in this if statement are the same for str and float if statements
+            if input_type.__name__ == 'int':  # This will run when the input_type type is 'int'
                 try:  # tests if the input is an int
                     in_var = int(in_var)  # attempts to convert the str input to an int
                 except ValueError:  # if input cannot be converted, below is printed and the while loops again
@@ -379,20 +405,22 @@ def check_input_type(input_var, input_type):
                 if type(in_var).__name__ == 'int':  # if in_var is an int below will run
                     is_int = True  # stops while loop
 
+            # checks if input_var type is a str
             #  after creating the str checker I have realised it serves no purpose unless I want to make sure the
-            #  input cannot be an int or float either. The other two functions have purpose though.
+            #  input cannot be an int or float either. The other two if statements are used in the program.
             elif input_type.__name__ == 'str':
                 try:  # checks if input is an int
                     in_var = int(in_var)
                     print("That wasn't a String.")
                 except ValueError:
-                    try:  # checks if input is a float
+                    try:
                         in_var = float(in_var)
                         print("That wasn't a String.")
-                    except ValueError:  # if input isn't an int or float then below stops loop
+                    except ValueError:
                         if type(in_var).__name__ == 'str':
                             is_int = True
 
+            # checks if input_var type is a float
             elif input_type.__name__ == 'float':
                 try:
                     in_var = float(in_var)
@@ -404,7 +432,7 @@ def check_input_type(input_var, input_type):
         else:
             is_int = True  # if isinstance is true then loop isn't needed
 
-    return in_var
+    return in_var  # if the in_var passed is modified during this method then it will be passed back
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
