@@ -141,6 +141,13 @@ class MainMenu:
         while loop_count < gc_max_items and temp_max < gc_max_spend:
             cost = check_input_type(input("Purchase price: "), float)  # takes user input into cost variable
 
+            not_zero = False
+            while not not_zero:  # fixes entering 0 logic error from first assessment.
+                if cost > 0:
+                    not_zero = True
+                else:
+                    cost = check_input_type(input("Enter a number above 0: "), float)
+
             temp_max = temp_max + cost  # stores the temporary total cost
 
             if temp_max <= gc_max_spend:  # checks if temp max is lower or equal to max spend
@@ -256,11 +263,6 @@ class MainMenu:
             print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " + str(
                 gc_indiv_purchases.loc[col, 'ItemDescription']))
             # prints out gift card purchase price and description
-
-
-
-
-
 
         print('')
         re_to_menu = input("Would you like to return to the menu (Yes or No): ")
@@ -406,7 +408,4 @@ def check_input_type(input_var, input_type):
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
-MainMenu_ob.on_launch()
-# check_input_type(8.9, str)
-#drugs = check_input_type(45454545, str)
-#print(drugs)
+MainMenu_ob.on_launch()  # starts on_launch def
