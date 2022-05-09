@@ -117,7 +117,7 @@ class MainMenu:
 
         col_ch = check_input_type(input("Please enter which card you would like to use (1, 2, 3 etc): "), int) - 1
         allowed_ans = False
-        # stops user being able to choose an option that will error out the rest of the program.
+        # stops user being able to choose an option that doesn't exist
         while not allowed_ans:
             if col_ch < 0 or col_ch > (len(df) - 1):  # only allows user to choose a number inside
                 col_ch = check_input_type(input("Please enter a number listed above: "), int) - 1
@@ -128,7 +128,7 @@ class MainMenu:
         # column choice (gc choice), used to assign vars below
 
         gc_card_name = df.loc[col_ch, 'GiftCardName']  # pulls item specified by col_ch from column 'SpendingLimit'
-        gc_max_spend = df.loc[col_ch, 'SpendingLimit']  # assigns to local vars so ported program can be used
+        gc_max_spend = df.loc[col_ch, 'SpendingLimit']  # assigns to local vars so assess1 code can be used
         gc_max_items = df.loc[col_ch, 'MaxItems']
 
         print("You have chosen:\n Gift Card : " + str(gc_card_name) + "\n Spending Limit: $" + str(gc_max_spend) +
@@ -151,7 +151,7 @@ class MainMenu:
             cost = check_input_type(input("Purchase price: "), float)  # takes user input into cost variable
 
             not_zero = False
-            while not not_zero:  # fixes entering 0 logic error from first assessment.
+            while not not_zero:
                 if cost > 0:  # checks if the cost var value is greater than 0
                     not_zero = True
                 else:
@@ -303,9 +303,9 @@ class MainMenu:
         pd.DataFrame(spending_history).to_csv('spendingHistory.csv', index=False)
         print("Initialisation complete: csv files created and setup.\n")
 
-        with open("pr_lch.bak", 'w') as file_edit:  # creates file that tells the program it has been run before
+        with open("settings.ini", 'w') as file_edit:  # creates file that tells the program it has been run before
             file_edit.write("1")  # writes a '1' into the file
-            os.system("attrib +h pr_lch.bak")  # hides file
+            os.system("attrib +h settings.ini")  # hides file
 
         self.menu()  # starts menu
 
@@ -314,12 +314,13 @@ class MainMenu:
         # It checks if the program has been opened before.
         # If the program hasn't, it will launch the create_initial_csv function
         # Else it will launch the menu function
-        if os.path.exists("pr_lch.bak"):  # checks if file exists, pr_lch is short for programRun_Launch.
-            os.system("attrib -h pr_lch.bak")  # unhides file
-            with open("pr_lch.bak", 'r') as launched_before:  # opens pr_lch file
+        # settings.ini could be expanded in future with more settings, for now this is all that is required.
+        if os.path.exists("settings.ini"):  # checks if file exists
+            os.system("attrib -h settings.ini")  # unhides file
+            with open("settings.ini", 'r') as launched_before:  # opens settings.ini file
                 if launched_before.readline() == '1':  # checks if it has a '1' in it
                     # This is done to check if the file has been tampered with
-                    os.system("attrib +h pr_lch.bak")  # rehides file (stops tampering)
+                    os.system("attrib +h settings.ini")  # rehides file (stops tampering)
                     self.menu()  # launches menu function
                 else:
                     self.create_initial_csv()  # runs initial startup

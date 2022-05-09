@@ -294,18 +294,18 @@ class MainMenu:
         pd.DataFrame(spending_history).to_csv('spendingHistory.csv', index=False)
         print("Initialisation complete: csv files created and setup.")
 
-        with open("pr_lch.bak", 'w') as file_edit:  # creates a file that tells the program if it has been run before
+        with open("settings.ini", 'w') as file_edit:  # creates a file that tells the program if it has been run before
             file_edit.write("1")
-            os.system("attrib +h pr_lch.bak")
+            os.system("attrib +h settings.ini")
 
         self.menu()
 
     def on_launch(self):
-        if os.path.exists("pr_lch.bak"):  # checks if file exists
-            os.system("attrib -h pr_lch.bak")  # unhides file
-            with open("pr_lch.bak", 'r') as launched_before:
+        if os.path.exists("settings.ini"):  # checks if file exists
+            os.system("attrib -h settings.ini")  # unhides file
+            with open("settings.ini", 'r') as launched_before:
                 if launched_before.readline() == '1':  # checks if it has a '1' in it
-                    os.system("attrib +h pr_lch.bak")  # rehides file (stops tampering)
+                    os.system("attrib +h settings.ini")  # rehides file (stops tampering)
                     self.menu()  # starts menu
                 else:
                     self.create_initial_csv()  # runs initial startup
