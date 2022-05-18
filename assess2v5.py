@@ -108,7 +108,7 @@ class MainMenu:
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
 
         print("\nPlease choose a gift card from this list: \n")
-        for col in range(len(df)):
+        for col in range(len(df)):  # Creates a list of gift cards to choose from by looping for the length of df
             t.sleep(self.dt)
             if col == 0:
                 print(str(col + 1) + ". " + str(df.loc[col, 'GiftCardName']) + " (Default)")
