@@ -17,11 +17,13 @@ from time import sleep as sl  # replaces time.sleep command with sl
 
 
 class MainMenu:
+    # this is the mainMenu class used, only needed one class. It holds all the functions that require access to
+    # variables (vars) built by the _init__ constructor.
     def __init__(self):
-        # This method is a special python constructor which runs when the object class MainMenu is created.
+        # This method is a special python constructor which runs when an object of class MainMenu is created.
         # It initialises vars used from assessment 1, I removed some vars as they had been deprecated by
         # my use of Dataframes in this assessment.
-        self.dt = 0.3  # default time for t.sleep
+        self.dt = 0.3  # default time for t.sleep (sl)
 
         # vars ported from assess1, may cull over time
         self.gc_items_lst = []  # init variables so that other functions can use them
@@ -44,7 +46,7 @@ class MainMenu:
         print("Welcome to the Spending Spree Menu!\n")
         sl(self.dt)
 
-        print('') # prints out the menu options
+        print('')  # prints out the menu options
         print("Options:\n 1. Define a gift card. \n 2. Go on a Spending Spree. \n 3. Display list of existing gift "
               "cards.\n 4. Display spending history. \n 5. Clean CSV files.\n Q. Quit the program (Q).\n")
 
@@ -118,18 +120,19 @@ class MainMenu:
                 print(str(col + 1) + ". " + str(df.loc[col, 'GiftCardName']))
 
         col_ch = check_input_type(input("Please enter which card you would like to use (1, 2, 3 etc): "), int) - 1
+        # -1 added because the printed list started at 1 not 0.
         allowed_ans = False
         # stops user being able to choose an option that doesn't exist
         while not allowed_ans:
-            if col_ch < 0 or col_ch > (len(df) - 1):  # only allows user to choose a number inside
-                col_ch = check_input_type(input("Please enter a number listed above: "), int) - 1
+            if col_ch < 0 or col_ch > (len(df) - 1):  # only allows user to choose a number that is assigned to a gc
+                col_ch = check_input_type(input("Please enter a number listed above: "), int) - 1  # loops until true
             else:
-                allowed_ans = True
+                allowed_ans = True  # ends loop
 
         print('')
         # column choice (gc choice), used to assign vars below
 
-        gc_card_name = df.loc[col_ch, 'GiftCardName']  # pulls item specified by col_ch from column 'SpendingLimit'
+        gc_card_name = df.loc[col_ch, 'GiftCardName']  # pulls line specified by col_ch from column 'SpendingLimit'
         gc_max_spend = df.loc[col_ch, 'SpendingLimit']  # assigns to local vars so assess1 code can be used
         gc_max_items = df.loc[col_ch, 'MaxItems']
 
@@ -147,7 +150,6 @@ class MainMenu:
         gc_items_lst = self.gc_items_lst
         loop_count = self.loop_count
 
-        # no str into int input exception handling has been implemented, as isn't mentioned in marking guidelines.
         # loop will repeat until loop_count is greater than gc_max_items or temp_max is higher than gc_max_spend
         while loop_count < gc_max_items and temp_max < gc_max_spend:
             cost = check_input_type(input("Purchase price: "), float)  # takes user input into cost variable
@@ -158,7 +160,7 @@ class MainMenu:
                     not_zero = True
                 else:
                     cost = check_input_type(input("Enter a number above 0: "), float)
-                    # check_input_type method is also used so that the user cannot enter a value below zero initially
+                    # check_input_type method is used again so that the user cannot enter a value below zero initially
                     # and then enter a String here and cause an error.
 
             temp_max = temp_max + cost  # stores the temporary total cost
@@ -174,7 +176,8 @@ class MainMenu:
             else:
                 print("\nThe gift card doesn't have enough funds to process this purchase, please try again.")
 
-                # resets temp_max back to the last accepted spending amount by settings its value to gc_cost_lst
+                # resets temp_max back to the last accepted spending amount by pulling its value from gc_cost_lst
+                # this works because the sum of the numbers in the lst are all the values that have been entered already
                 temp_max = sum(gc_cost_lst)
 
             sl(self.dt)
@@ -193,8 +196,9 @@ class MainMenu:
         export_df['GiftCardName'] = gc_card_name  # creates a new column with the name of the gift card used
         export_df = export_df.loc[:, ['GiftCardName', 'ItemDescription', 'ItemPrice']]  # rearranges the columns
 
+        # this combines any existing data in the csv with new data in the dataframe
         combined_df = pd.concat([pd.read_csv('spendingHistory.csv'), export_df])
-        pd.DataFrame(combined_df).to_csv('spendingHistory.csv', index=False)
+        pd.DataFrame(combined_df).to_csv('spendingHistory.csv', index=False)  # exports the combined df back to the csv
 
         print("Gift card expended, purchases are listed below, they are ordered from most to least expensive.\n")
         for x in range(loop_count):  # prints the list of transactions ordered highest cost to lowest :)
@@ -220,12 +224,13 @@ class MainMenu:
 
     def gc_names(self):  # 3
         # This function allows the user to print out the list of existing gift cards.
-        # Gift cards will be extracted from 'giftCards.csv' using Pandas functions
+        # Gift cards will be extracted from 'giftCards.csv' using Pandas
         print("\nList of existing gift cards: ")
         init = pd.read_csv('giftCards.csv')  # reads the csv into init
 
         gc_names = init['GiftCardName'].copy()  # creates a series from the 'GiftCardName' column in init
         gc_names = gc_names.drop_duplicates()  # removes duplicate names from the series
+        # because every column entry contains the gc name, duplicates need to be removed before printing the list
         gc_names = gc_names.to_frame()  # turns the series into a dataframe
         gc_names.reset_index(inplace=True, drop=True)  # fixes the index, when duplicates are removed the index breaks
 
