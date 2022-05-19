@@ -11,9 +11,9 @@ You DO NOT need to write defs into the console, just run the entire program.
 """
 import os
 import sys
-import time as t
 import pandas as pd
 from getpass import getuser
+from time import sleep as sl  # replaces time.sleep command with sl
 
 
 class MainMenu:
@@ -37,18 +37,18 @@ class MainMenu:
         # spending spree menu, says hello to the user. Runs the menu 1,2,3,4 Q options.
         if not self.name_assigned:  # implemented so user is only addressed once
             print("Hello " + str(getuser()) + "!\n")  # :)
-            self.username = str(getuser())
+            self.username = str(getuser())  # assigns username the result of getuser()
             self.name_assigned = True
-            t.sleep(1)
+            sl(1)  # This is the time.sleep used throughout the program
 
         print("Welcome to the Spending Spree Menu!\n")
-        t.sleep(self.dt)
+        sl(self.dt)
 
-        print('')
+        print('') # prints out the menu options
         print("Options:\n 1. Define a gift card. \n 2. Go on a Spending Spree. \n 3. Display list of existing gift "
-              "cards.\n 4. Display spending history. \n Q. Quit the program (Q).\n")
+              "cards.\n 4. Display spending history. \n 5. Clean CSV files.\n Q. Quit the program (Q).\n")
 
-        choice = input("Choose 1, 2, 3, 4 or Q: ")
+        choice = input("Choose between 1-5 or Q: ")
         if choice == '1':
             self.gift_card()  # pretty self-explanatory, launches the def gift_card
         if choice == '2':
@@ -57,6 +57,8 @@ class MainMenu:
             self.gc_names()
         if choice == '4':
             self.gc_history()
+        if choice == '5':
+            clean_system()
         if choice.lower() == 'q':
             print("Goodbye! ")
 
@@ -64,7 +66,7 @@ class MainMenu:
         # This function allows the user to build extra gift cards.
         # User will enter gift card specs, if all are accepted then gift card will be added to the csv.
         print("Hello, I am Delilah, your personal gift card management system.")
-        t.sleep(self.dt)  # stops the sequence for .3, adds readability
+        sl(self.dt)  # stops the sequence for .3, adds readability
         print("Please enter the specifications of your gift card.\n")
 
         # all inputs are for the gift card specifications.
@@ -78,17 +80,17 @@ class MainMenu:
             gc_max_spend = check_input_type(input("Please enter a value in a range of $100-$500: "), float)
 
         gc_max_items = check_input_type(input("Maximum number of items allowed to purchase (1-5): "), int)
-        while gc_max_items < 1 or gc_max_items > 5:
+        while gc_max_items < 1 or gc_max_items > 5:  # boundary check
             gc_max_items = check_input_type(input("Please enter a value in a range of 1-5: "), int)
 
         print('')
 
         # prints out the previously input details
-        t.sleep(self.dt)
+        sl(self.dt)
         print("These are your gift card details:\n" + "\nGift card name: " + gc_name)
-        t.sleep(self.dt)
+        sl(self.dt)
         print("Gift card maximum spending allowed: $" + str(gc_max_spend))
-        t.sleep(self.dt)
+        sl(self.dt)
         print("Gift card maximum number of items allowed to purchase: " + str(gc_max_items) + "\n")
 
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
@@ -109,7 +111,7 @@ class MainMenu:
 
         print("\nPlease choose a gift card from this list: \n")
         for col in range(len(df)):  # Creates a list of gift cards to choose from by looping for the length of df
-            t.sleep(self.dt)
+            sl(self.dt)
             if col == 0:
                 print(str(col + 1) + ". " + str(df.loc[col, 'GiftCardName']) + " (Default)")
             else:
@@ -137,7 +139,7 @@ class MainMenu:
 
         # ported from assess 1 :)
 
-        t.sleep(self.dt)
+        sl(self.dt)
         temp_max = 0
         # gc_max_items = self.gc_max_items  # pulls variable values from init def  # deprecated by df.loc
         # gc_max_spend = self.gc_max_spend
@@ -175,7 +177,7 @@ class MainMenu:
                 # resets temp_max back to the last accepted spending amount by settings its value to gc_cost_lst
                 temp_max = sum(gc_cost_lst)
 
-            t.sleep(self.dt)
+            sl(self.dt)
             print("Gift card used so far: $" + str(temp_max) + " out of $" + str(gc_max_spend) + "\n")
             self.loop_count = loop_count  # loop is modified after assignment so self.loop needs to be updated
 
@@ -197,18 +199,18 @@ class MainMenu:
         print("Gift card expended, purchases are listed below, they are ordered from most to least expensive.\n")
         for x in range(loop_count):  # prints the list of transactions ordered highest cost to lowest :)
             print("Cost: $" + str(gc_list_sorted[x][0]) + ", item description: " + str(gc_list_sorted[x][1]))
-            t.sleep(self.dt)  # exceeds requirement to print most expensive item.
+            sl(self.dt)  # exceeds requirement to print most expensive item.
 
         gc_num_item_purchased = len(gc_list_sorted)  # counts number of nested list items for average computation
         gc_average_cost = sum(gc_cost_lst) / gc_num_item_purchased  # average cost with sum of lst / num of purchases
 
-        t.sleep(self.dt)
+        sl(self.dt)
         print("\nGift card used: " + str(gc_card_name) + ", spending limit: $" + str(gc_max_spend))
-        t.sleep(self.dt)
+        sl(self.dt)
         print("The number of items purchased was: " + str(gc_num_item_purchased))
-        t.sleep(self.dt)
+        sl(self.dt)
         print("The average cost was: $" + str(round(gc_average_cost, 2)) + "\n")  # rounds avg cost -> 2 dec places
-        t.sleep(self.dt)
+        sl(self.dt)
 
         re_to_menu = input("Would you like to return to the menu (Yes or No): ")
         if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
@@ -271,10 +273,10 @@ class MainMenu:
         gc_indiv_purchases = init.loc[[gc_indiv_ch], :]  # passes rows based on index name, selected by gc_indiv_ch
         gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName as the index
 
-        t.sleep(self.dt)
+        sl(self.dt)
         print("Purchase History of " + gc_indiv_ch + ": ")
         for col in range(len(gc_indiv_purchases)):  # loops for the number of items purchases by selected gift card
-            t.sleep(self.dt)
+            sl(self.dt)
             print(str(col + 1) + ". $" + str(gc_indiv_purchases.loc[col, 'ItemPrice']) + ", " + str(
                 gc_indiv_purchases.loc[col, 'ItemDescription']))
             # prints out gift card purchase price and description
@@ -291,9 +293,9 @@ class MainMenu:
         # it creates the two csv files needed and fills them with the data required by the program
         # creates giftCards.csv
         gift_cards = pd.DataFrame(columns=['GiftCardName', 'SpendingLimit', 'MaxItems'])
-        # creates dataframe and adds specified columns
+        # creates dataframe and adds specified columns, stops errors occurring later
         gift_cards.loc[0, 'GiftCardName'] = 'Victory-day gift card'  # adds specified data into dataframe
-        gift_cards.loc[0, 'SpendingLimit'] = 200
+        gift_cards.loc[0, 'SpendingLimit'] = 200  # 0 is column location, Spen... is column name, 200 is the value
         gift_cards.loc[0, 'MaxItems'] = 4
 
         pd.DataFrame(gift_cards).to_csv('giftCards.csv', index=False)  # exports dataframe to csv
@@ -301,10 +303,10 @@ class MainMenu:
         # creates spendingHistory.csv
         spending_history = pd.DataFrame(columns=['GiftCardName', 'ItemDescription', 'ItemPrice'])
         pd.DataFrame(spending_history).to_csv('spendingHistory.csv', index=False)
-        print("Initialisation complete: csv files created and setup.\n")
+        print("Initialisation Complete: CSV files created, ready for use :)\n")
 
         with open("settings.ini", 'w') as file_edit:  # creates file that tells the program it has been run before
-            file_edit.write("1")  # writes a '1' into the file
+            file_edit.write("programLaunchedBefore=true")  # writes a '1' into the file
             os.system("attrib +h settings.ini")  # hides file
 
         self.menu()  # starts menu
@@ -318,8 +320,9 @@ class MainMenu:
         if os.path.exists("settings.ini"):  # checks if file exists
             os.system("attrib -h settings.ini")  # unhides file
             with open("settings.ini", 'r') as launched_before:  # opens settings.ini file
-                if launched_before.readline() == '1':  # checks if it has a '1' in it
+                if launched_before.readline() == 'programLaunchedBefore=true':  # checks if settings.ini has been edited
                     # This is done to check if the file has been tampered with
+                    # if you would like to wipe the data inside the csv files, simply delete or set the var to false
                     os.system("attrib +h settings.ini")  # rehides file (stops tampering)
                     self.menu()  # launches menu function
                 else:
@@ -330,12 +333,12 @@ class MainMenu:
 
 def input_checker(input_to_be_checked, csv, column_name):
     # This method is used to determine if the argument 'input_to_be_checked' is already a 'col_name' (column)
-    # in the 'csv' file. If it is, then the user will be asked to replace the name with one not in
+    # in the 'csv' file. If it is, then the user will be asked to replace the name with a new name not in
     # the 'csv' file.
 
     df = pd.read_csv(csv)  # reads the csv file from the argument csv
 
-    in_chk = input_to_be_checked  # reduce local var names for ease of use
+    in_chk = input_to_be_checked  # reduced local var names for ease of use
     col_name = column_name
 
     name_allowed = False
@@ -358,7 +361,7 @@ def input_checker(input_to_be_checked, csv, column_name):
 
 def check_input_type(input_var, input_type):
     # This method is used to determine if the input_var is the same type as the input_type.
-    # This is needed to make sure the user is entering the right var type so that the program doesn't create an error
+    # This is needed to make sure the user is entering the right var type so no errors occur
     in_var = input_var
 
     is_int = False  # loop will run until bool is True
@@ -434,6 +437,20 @@ def check_input_type(input_var, input_type):
             is_int = True  # if isinstance is true then loop isn't needed
 
     return in_var  # if the in_var passed is modified during this method then it will be passed back
+
+
+def clean_system():  # 5
+    # This function will modify the settings.ini so that on program relaunch the csv files will be empty
+    if os.path.exists("settings.ini"):  # checks if file exists
+        os.system("attrib -h settings.ini")  # unhides file
+        with open("settings.ini", 'w') as file_edit:  # creates file that tells the program it has been run before
+            file_edit.write("programLaunchedBefore=false")  # writes a '1' into the file
+            os.system("attrib +h settings.ini")  # hides file
+    else:
+        print("Unable to locate settings.ini")  # This shouldn't be possible because of the tampering protections
+
+    print("\n CSV Files wiped. Please relaunch.")
+    sys.exit()  # ends program
 
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
