@@ -466,6 +466,8 @@ def check_input_type(input_var, input_type):
 
 def clean_system():  # 5
     # This function will modify the settings.ini so that on program relaunch the csv files will be empty
+    # for my testing it made no sense to erase the CSV files, this was added because apparently it's easier to
+    # mark if the CSV files are erased each program launch
 
     if os.path.exists("settings.ini"):  # checks if file exists
         os.system("attrib -h settings.ini")  # unhides file
