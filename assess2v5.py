@@ -2,11 +2,12 @@
 Boring stuff
 Author: Daniel Ferguson
 Auth ID: 3374690
-Date: Start -> 10/04/22 Completion -> 12/04/22
+Date: Start -> 10/04/22 Functionality Complete -> 12/04/22 Upload -> 20/04/22
 Task: INFT1004 Assignment 2: Spending Spree
 I have ported large parts of this program from assessment 1 :)
 I have integrated Pandas Dataframes into the ported code for csv manipulation
 On first start this program will create the required csv files, thus this .py is the only submitted file
+This program is formatted according to the Python PEP 8 standard.
 You DO NOT need to write defs into the console, just run the entire program.
 """
 import os
@@ -19,10 +20,12 @@ from time import sleep as sl  # replaces time.sleep command with sl
 class MainMenu:
     # this is the mainMenu class used, only needed one class. It holds all the functions that require access to
     # variables (vars) built by the _init__ constructor.
+
     def __init__(self):
         # This method is a special python constructor which runs when an object of class MainMenu is created.
         # It initialises vars used from assessment 1, I removed some vars as they had been deprecated by
         # my use of Dataframes in this assessment.
+
         self.dt = 0.3  # default time for t.sleep (sl)
 
         # vars ported from assess1, may cull over time
@@ -36,12 +39,13 @@ class MainMenu:
         self.name_assigned = False
 
     def menu(self):
-        # spending spree menu, says hello to the user. Runs the menu 1,2,3,4 Q options.
+        # spending spree menu, says hello to the user. Runs the menu 1,2,3,4,5 & Q options.
+
         if not self.name_assigned:  # implemented so user is only addressed once
             print("Hello " + str(getuser()) + "!\n")  # :)
             self.username = str(getuser())  # assigns username the result of getuser()
             self.name_assigned = True
-            sl(1)  # This is the time.sleep used throughout the program
+            sl(1)  # This is the time.sleep abbreviation used throughout the program
 
         print("Welcome to the Spending Spree Menu!\n")
         sl(self.dt)
@@ -67,6 +71,7 @@ class MainMenu:
     def gift_card(self):  # 1
         # This function allows the user to build extra gift cards.
         # User will enter gift card specs, if all are accepted then gift card will be added to the csv.
+
         print("Hello, I am Delilah, your personal gift card management system.")
         sl(self.dt)  # stops the sequence for .3, adds readability
         print("Please enter the specifications of your gift card.\n")
@@ -95,12 +100,13 @@ class MainMenu:
         sl(self.dt)
         print("Gift card maximum number of items allowed to purchase: " + str(gc_max_items) + "\n")
 
-        df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
+        df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe "df"
         df.loc[len(df)] = [gc_name, gc_max_spend, gc_max_items]  # creates a new row and adds the gc details into it
         df.to_csv('giftCards.csv', index=None)  # writes the Dataframe to the csv file.
+        # The process above is what writes the gift card details into 'giftCards.csv' using Pandas Dataframe
 
         re_to_menu = input("Would you like to return to the menu (Yes or No): ")
-        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":
+        if re_to_menu.upper() == "Y" or re_to_menu.upper() == "YES":  # user can enter Y,y or YES,yes, and it will work
             self.menu()  # returns to menu
         else:
             sys.exit()  # ends program
@@ -108,7 +114,8 @@ class MainMenu:
     def spending_spree(self):  # 2
         # This function allows the user to go on a spending spree.
         # User will select a gift card to use, from 'giftCards.csv'.
-        # The gift card specs will be imported, user will spend until they exceed the specifications.
+        # The gift card specs will be imported, user will spend until they exceed the gc specifications.
+
         df = pd.read_csv('giftCards.csv')  # reads giftCards.csv into Dataframe df
 
         print("\nPlease choose a gift card from this list: \n")
@@ -186,12 +193,11 @@ class MainMenu:
 
         # ported def loop from assess 1.
         # nests Cost and Items into sublists so that Cost var can be manipulated using sorted function
-        # use prints on the below lists after manipulation to gain greater understanding of what is happening :)
         gc_list_nested = [list(x) for x in zip(gc_cost_lst, gc_items_lst)]
         # uses nested list to sort nested items based on cost, because desc is nested it follows cost movement
         gc_list_sorted = sorted(gc_list_nested, key=lambda l: l[0], reverse=True)
 
-        # creates a dataframe out of the sorted list, adds columns
+        # creates a dataframe out of the sorted list
         export_df = pd.DataFrame(gc_list_sorted, columns=['ItemPrice', 'ItemDescription'])
         export_df['GiftCardName'] = gc_card_name  # creates a new column with the name of the gift card used
         export_df = export_df.loc[:, ['GiftCardName', 'ItemDescription', 'ItemPrice']]  # rearranges the columns
@@ -225,6 +231,7 @@ class MainMenu:
     def gc_names(self):  # 3
         # This function allows the user to print out the list of existing gift cards.
         # Gift cards will be extracted from 'giftCards.csv' using Pandas
+
         print("\nList of existing gift cards: ")
         init = pd.read_csv('giftCards.csv')  # reads the csv into init
 
@@ -248,6 +255,7 @@ class MainMenu:
     def gc_history(self):  # 4
         # This function prints out a gift card stored in 'spendingHistory.csv'.
         # User will select a gift card to print and its purchase history, price and description will be printed.
+
         print("List of gift cards: ")
         init = pd.read_csv('spendingHistory.csv')  # reads the csv into init
 
@@ -275,6 +283,7 @@ class MainMenu:
         # converts 1,2,3 etc into the actual GiftCardName required for steps below
 
         init.set_index('GiftCardName', inplace=True)  # makes column 'GiftCardName' the index
+        # inplace means that the current dataframe is modified and a new one isn't created
         gc_indiv_purchases = init.loc[[gc_indiv_ch], :]  # passes rows based on index name, selected by gc_indiv_ch
         gc_indiv_purchases.reset_index(inplace=True, drop=True)  # removes GiftCardName as the index
 
@@ -297,6 +306,7 @@ class MainMenu:
         # this def will be launched on the first run of this program on a new computer.
         # it creates the two csv files needed and fills them with the data required by the program
         # creates giftCards.csv
+
         gift_cards = pd.DataFrame(columns=['GiftCardName', 'SpendingLimit', 'MaxItems'])
         # creates dataframe and adds specified columns, stops errors occurring later
         gift_cards.loc[0, 'GiftCardName'] = 'Victory-day gift card'  # adds specified data into dataframe
@@ -311,7 +321,7 @@ class MainMenu:
         print("Initialisation Complete: CSV files created, ready for use :)\n")
 
         with open("settings.ini", 'w') as file_edit:  # creates file that tells the program it has been run before
-            file_edit.write("programLaunchedBefore=true")  # writes a '1' into the file
+            file_edit.write("programLaunchedBefore=true")  # writes 'programLaunchedBefore=true' into the file
             os.system("attrib +h settings.ini")  # hides file
 
         self.menu()  # starts menu
@@ -322,6 +332,7 @@ class MainMenu:
         # If the program hasn't, it will launch the create_initial_csv function
         # Else it will launch the menu function
         # settings.ini could be expanded in future with more settings, for now this is all that is required.
+
         if os.path.exists("settings.ini"):  # checks if file exists
             os.system("attrib -h settings.ini")  # unhides file
             with open("settings.ini", 'r') as launched_before:  # opens settings.ini file
@@ -367,6 +378,7 @@ def input_checker(input_to_be_checked, csv, column_name):
 def check_input_type(input_var, input_type):
     # This method is used to determine if the input_var is the same type as the input_type.
     # This is needed to make sure the user is entering the right var type so no errors occur
+
     in_var = input_var
 
     is_int = False  # loop will run until bool is True
@@ -416,7 +428,7 @@ def check_input_type(input_var, input_type):
 
             # checks if input_var type is a str
             #  after creating the str checker I have realised it serves no purpose unless I want to make sure the
-            #  input cannot be an int or float either. The other two if statements are used in the program.
+            #  string input cannot be an int or float either. The other two if statements are used in the program.
             elif input_type.__name__ == 'str':
                 try:  # checks if input is an int
                     in_var = int(in_var)
@@ -446,10 +458,11 @@ def check_input_type(input_var, input_type):
 
 def clean_system():  # 5
     # This function will modify the settings.ini so that on program relaunch the csv files will be empty
+
     if os.path.exists("settings.ini"):  # checks if file exists
         os.system("attrib -h settings.ini")  # unhides file
         with open("settings.ini", 'w') as file_edit:  # creates file that tells the program it has been run before
-            file_edit.write("programLaunchedBefore=false")  # writes a '1' into the file
+            file_edit.write("programLaunchedBefore=false")  # writes the text into settings.ini
             os.system("attrib +h settings.ini")  # hides file
     else:
         print("Unable to locate settings.ini")  # This shouldn't be possible because of the tampering protections
@@ -460,3 +473,4 @@ def clean_system():  # 5
 
 MainMenu_ob = MainMenu()  # instantiates a new object of the MainMenu Class
 MainMenu_ob.on_launch()  # starts on_launch def
+# Hope you enjoyed my program :)
